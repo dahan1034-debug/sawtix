@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f5f7" />
+    <title>SAWTIX — استوديو التعليق الصوتي من FINIX</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="apple-header">
+        <div class="brand-group">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+              <line x1="12" y1="19" x2="12" y2="22" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="brand-title">SAWTIX</h1>
+            <p class="brand-subtitle">استوديو تعليق صوتي سعودي من FINIX • فهم للمعنى • نطق مشكّل • توقيت بالثانية</p>
+          </div>
+        </div>
+        <div class="header-meta">
+          <span class="chip chip-blue" id="voiceChip" title="الصوت الموحّد">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3" /></svg>
+            <span id="voiceChipLabel">FINIX-SA-01</span>
+          </span>
+          <span class="chip chip-green" id="durationChip" title="المدة المقدرة">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15.5 14" /></svg>
+            <span id="durationLabel">0.0 ث</span>
+          </span>
+          <span class="chip" id="scoreChip" title="جودة النص اللغوية">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.4l6.1-.8L12 3z" /></svg>
+            <span id="scoreLabel">—</span>
+          </span>
+          <div class="header-actions">
+            <button class="btn btn-secondary btn-sm" type="button" id="exportProject">تصدير المشروع</button>
+            <label class="btn btn-secondary btn-sm" for="importProject" style="margin: 0">استيراد</label>
+            <input id="importProject" type="file" accept="application/json" hidden />
+          </div>
+        </div>
+      </header>
+
+      <div class="toast" id="toast" role="status"></div>
+
+      <!-- ١) السكريبت -->
+      <section class="apple-card">
+        <div class="card-header">
+          <h2 class="card-heading">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.6 3.4a2.1 2.1 0 0 1 3 3L7.5 18.5 3 20l1.5-4.5Z" /></svg>
+            اكتب السكريبت
+          </h2>
+          <div class="header-actions">
+            <button class="btn btn-secondary btn-sm" type="button" data-preset="hook">قالب ريلز تشويقي</button>
+            <button class="btn btn-secondary btn-sm" type="button" data-preset="tutorial">قالب شرح</button>
+            <button class="btn btn-secondary btn-sm" type="button" id="sampleScript">نص جاهز</button>
+          </div>
+        </div>
+        <p class="card-desc">
+          اكتب كما تتكلم. النظام يحوّل الأرقام والعملات والتواريخ إلى كلمات، يصحّح الإملاء، يضبط التشكيل، ويقسّم النص إلى جمل لكل جملة نبرتها ووقفتها.
+        </p>
+        <textarea id="scriptInput" class="script-box" placeholder="مثال: تتوقع ليش أغلب الناس يوقفون عند أول ثانيتين؟ السبب مو الكاميرا... السر إن البداية ما فيها فضول. جرّب تطبق الفكرة اليوم!"></textarea>
+        <div class="action-row">
+          <button class="btn btn-primary btn-lg" type="button" id="renderTop">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+            توليد التعليق الصوتي
+          </button>
+          <button class="btn btn-secondary" type="button" id="dialectizeBtn">حوّل للهجة السعودية</button>
+          <button class="btn btn-secondary" type="button" id="analyzeBtn">مراجعة وتحليل الآن</button>
+          <button class="btn btn-danger-soft btn-sm" type="button" id="clearScript">مسح</button>
+        </div>
+        <div class="status-note" id="analyzeStatus"></div>
+      </section>
+
+      <div class="studio-workspace" id="studioWorkspace">
+
+        <!-- ٢) الهوية الصوتية -->
+        <section class="apple-card">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.1"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /></svg>
+              الهوية الصوتية والأداء
+            </h2>
+            <span class="chip" id="lexiconChip">قاموس اللهجة</span>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>الصوت الموحّد (عربي)</span>
+              <select id="voice"></select>
+              <small id="voiceNote"></small>
+            </label>
+            <label class="field">
+              <span>صوت الجمل الإنجليزية</span>
+              <select id="englishVoice"></select>
+              <small>يُستخدم تلقائياً عند وجود جملة إنجليزية داخل السكريبت.</small>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>نمط الأداء العام</span>
+              <select id="style"></select>
+              <small id="styleNote"></small>
+            </label>
+            <label class="field">
+              <span>دقة النطق (التشكيل)</span>
+              <select id="diacritics">
+                <option value="smart">ذكي — تشكيل كامل + قاموس اللهجة (الأنسب)</option>
+                <option value="light">خفيف — قاموس اللهجة فقط</option>
+                <option value="off">بلا تشكيل</option>
+              </select>
+              <small>التشكيل يمنع أخطاء الحركات، والقاموس يصحّح العامية.</small>
+            </label>
+          </div>
+
+          <div class="grid-3">
+            <label class="field">
+              <span>السرعة العامة</span>
+              <input id="rate" type="range" min="-25" max="25" step="1" />
+              <small><b id="rateVal">0%</b></small>
+            </label>
+            <label class="field">
+              <span>طبقة الصوت</span>
+              <input id="pitch" type="range" min="-20" max="20" step="1" />
+              <small><b id="pitchVal">0Hz</b></small>
+            </label>
+            <label class="field">
+              <span>مستوى الصوت</span>
+              <input id="volume" type="range" min="-15" max="15" step="1" />
+              <small><b id="volumeVal">0%</b></small>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <span>نمط التوقيت</span>
+              <div class="segmented" id="timingMode">
+                <button type="button" data-mode="natural" class="active">طبيعي (متتالي)</button>
+                <button type="button" data-mode="exact">مطابق بالثانية</button>
+              </div>
+              <small>«مطابق بالثانية» يعيد ضبط السرعة حتى تصل كل جملة لمدتها المستهدفة.</small>
+            </div>
+            <label class="field">
+              <span>الفاصل بين الجمل (ثانية)</span>
+              <input id="gap" type="number" min="0" max="3" step="0.05" />
+              <small>يُضاف إلى الوقفة المحسوبة من نوع الجملة.</small>
+            </label>
+          </div>
+        </section>
+
+        <!-- ٣) مدير الاستوديو -->
+        <section class="apple-card" id="directorCard">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#af52de" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3" /><path d="M12 18v3" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>
+              مدير الاستوديو
+            </h2>
+            <div class="header-actions">
+              <label class="toggle-inline" for="directorToggle">
+                <input type="checkbox" id="directorToggle" checked />
+                <span>يقرأ النص ويوجّه الأداء تلقائياً</span>
+              </label>
+              <span class="chip" id="directorChip">بانتظار النص</span>
+            </div>
+          </div>
+          <p class="card-desc">
+            يحلّل المدير السكريبت قبل التوليد: نوع المحتوى والجمهور والنبرة، ثم يختار الصوت والنمط وشدة الأداء، ويضع خطة نطق للاختصارات والأرقام والكلمات الملتبسة، ويحدّد الكلمات التي تُبرَز في كل جملة. أي اختيار صريح منك يتقدّم على اقتراحه.
+          </p>
+          <div class="director-brief" id="directorBrief">
+            <p class="empty">اكتب نصاً ليقترح المدير الصوت والنمط وخطة النطق والأداء.</p>
+          </div>
+          <div class="grid-3" id="directorFacts"></div>
+          <div class="director-notes" id="directorNotes"></div>
+        </section>
+
+        <!-- ٤) المراجعة -->
+        <section class="apple-card" id="reviewCard">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="2.1" stroke-linecap="round"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+              مراجعة لغوية قبل التوليد
+            </h2>
+            <span class="chip" id="reviewBadge">بانتظار النص</span>
+          </div>
+          <div class="review-grid">
+            <div class="score-box">
+              <div class="score-ring" id="scoreRing"><span id="scoreValue">—</span></div>
+              <div class="score-caption" id="scoreGrade">لم تُجرَ المراجعة</div>
+              <div class="score-stats" id="scoreStats"></div>
+            </div>
+            <div class="issues-box">
+              <div id="issuesList" class="issues-list">
+                <p class="empty">اكتب نصاً ليبدأ الفحص: اللهجة، الإملاء، الأرقام، الأسماء الأجنبية، وطول الجمل.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ٤) المقاطع -->
+        <section class="apple-card">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.1"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15.5 14" /></svg>
+              المقاطع وخطة الإلقاء
+            </h2>
+            <div class="header-actions">
+              <span class="chip" id="segmentsChip">0 مقاطع</span>
+              <button class="btn btn-secondary btn-sm" type="button" id="relayout">توزيع تلقائي</button>
+              <button class="btn btn-secondary btn-sm" type="button" id="addSegment">+ مقطع</button>
+            </div>
+          </div>
+          <p class="card-desc">كل جملة تُحلَّل على حدة: سؤال، تعجب، كشف، تحذير، دعوة… وتُقسَّم عند الروابط لتأخذ كل فكرة نبرتها. اضغط «خطة الإلقاء» لرؤية السرعة والوقفة وطريقة النطق الفعلية.</p>
+          <div class="timeline" id="timeline" aria-hidden="true"></div>
+          <div class="timeline-meta">
+            <span id="timelineTotal">الإجمالي المقدر: 0.0 ث</span>
+            <span>عرض البلوك = مدته • اللون = نوع النبرة</span>
+          </div>
+          <div id="segments" class="segments"></div>
+        </section>
+
+        <!-- ٥) القاموس -->
+        <section class="apple-card">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.1"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
+              قاموس النطق الخاص
+            </h2>
+            <span class="chip" id="dictCount">0 كلمة</span>
+          </div>
+          <p class="card-desc">كلمة أو اسم أو مصطلح تحب أن ينطقه الصوت بطريقة ثابتة في كل المقاطع. يُطبَّق قبل التشكيل ويحفظ تلقائياً.</p>
+          <div class="dict-form">
+            <label class="field">
+              <span>كما تكتبها</span>
+              <input id="dictOrig" type="text" placeholder="مثال: Canva" />
+            </label>
+            <label class="field">
+              <span>كما تُنطق</span>
+              <input id="dictPhon" type="text" placeholder="مثال: كَانْفَا" />
+            </label>
+            <button class="btn btn-primary" type="button" id="addDict">إضافة</button>
+          </div>
+          <div class="dict-chips" id="dictChips"></div>
+        </section>
+
+        <!-- ٦) التصدير -->
+        <section class="apple-card">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#28a745" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+              التصدير النهائي
+            </h2>
+            <span class="chip" id="outputChip">MP3 • SRT</span>
+          </div>
+          <p class="card-desc">تركيب على الخط الزمني مع صمت محسوب لكل جملة، تسوية مستوى إلى −16 LUFS، وتصدير MP3 ستيريو/مونو 48kHz جاهز للمونتاج، مع ملف ترجمة SRT وملف لكل مقطع.</p>
+          <div class="action-row">
+            <button class="btn btn-accent btn-lg" type="button" id="renderBtn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
+              توليد وتصدير MP3
+            </button>
+            <button class="btn btn-secondary" type="button" id="previewAll">معاينة كل المقاطع</button>
+          </div>
+          <div class="progress-bar" id="progressBar"><div class="progress-bar-fill" id="progressFill"></div></div>
+          <div class="progress-meta" id="progressMeta"></div>
+          <div class="status-note" id="renderStatus"></div>
+          <button class="btn btn-danger-soft btn-sm" type="button" id="cancelRender" hidden>إلغاء التوليد</button>
+          <div id="outputBox" class="output-box" hidden>
+            <audio id="finalAudio" controls></audio>
+            <div class="action-row">
+              <a class="btn btn-primary" id="downloadMp3" download>تحميل MP3</a>
+              <a class="btn btn-secondary" id="downloadSrt" download>تحميل SRT</a>
+            </div>
+            <div id="outputSegments" class="output-segments"></div>
+          </div>
+        </section>
+
+        <!-- ٧) سجل المهام -->
+        <section class="apple-card" id="historyCard">
+          <div class="card-header">
+            <h2 class="card-heading">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v6h6" /><path d="M3.5 9a9 9 0 1 0 2.1-4.9L3 9" /><polyline points="12 8 12 12 15 14" /></svg>
+              سجل المهام
+            </h2>
+            <div class="header-actions">
+              <span class="chip" id="queueChip">الطابور</span>
+              <button class="btn btn-secondary btn-sm" type="button" id="refreshJobs">تحديث</button>
+            </div>
+          </div>
+          <p class="card-desc">كل توليد يعمل كمهمة مستقلة في الطابور: ترى تقدّمها الحقيقي، تستطيع إلغاءها، وتجد ملفاتها هنا بعد إعادة تحميل الصفحة.</p>
+          <div id="jobsList" class="jobs-list">
+            <p class="empty">لا توجد مهام بعد — أول توليد سيظهر هنا.</p>
+          </div>
+        </section>
+
+        <footer class="footer-note">
+          SAWTIX من FINIX • محرك الصوت: Microsoft Edge Neural TTS (مجاني، بلا مفتاح). التشكيل: نموذج محلي على المعالج. القاموس والتحليل داخل المشروع.
+        </footer>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

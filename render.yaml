@@ -1,0 +1,17 @@
+# نشر SAWTIX على Render — Blueprint جاهز (Docker + فحص صحة + حماية دخول)
+services:
+  - type: web
+    name: sawtix
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: APP_USER
+        value: admin
+      - key: APP_PASSWORD
+        sync: false
+      - key: NODE_ENV
+        value: production

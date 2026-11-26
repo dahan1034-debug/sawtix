@@ -1,0 +1,21 @@
+{
+  "name": "sawti-studio",
+  "version": "1.5.0",
+  "private": true,
+  "type": "module",
+  "description": "SAWTIX من FINIX — استوديو تعليق صوتي سعودي بتوقيت دقيق ونبرات متحكَّم بها",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "setup": "npm install && node scripts/setup.mjs",
+    "deploy:hf": "node scripts/deploy-hf.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "ffmpeg-static": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}

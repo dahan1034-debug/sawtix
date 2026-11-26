@@ -1,0 +1,13 @@
+node_modules
+.venv
+out
+.tmp
+.git
+.gitignore
+*.zip
+*.log
+server.pid
+.env
+test
+docs
+coverage
