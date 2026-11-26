@@ -11,10 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Download source bundle
-        run: curl -fsSL "https://tmpfiles.org/dl/1795680909.72d0988c7a751259/wJAxa0PpsHgf/sawti-studio-v1.5.0.zip" -o /tmp/sawtix.zip
+        run: curl -fsSL "https://tmpfiles.org/dl/1795680984.ae838a3fecdc7838/wUAbaePCkdUk/sawti-studio-v1.5.0.zip" -o /tmp/sawtix.zip
       - name: Unpack and commit
         run: |
-          unzip -q /tmp/sawtix.zip -d .
+          unzip -oq /tmp/sawtix.zip -d .
           rm -f .github/workflows/import-source.yml
           git config user.name "SAWTIX Import"
           git config user.email "sawtix-import@users.noreply.github.com"
