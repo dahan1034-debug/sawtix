@@ -1,0 +1,44 @@
+name: Docker build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t sawtix:ci .
+
+      - name: Start container and check health
+        run: |
+          docker run -d --name sawtix-ci -p 7860:7860 \
+            -e APP_PASSWORD=ci-test-pass \
+            -e TTS_CONCURRENCY=2 \
+            -e QUEUE_CONCURRENCY=1 \
+            sawtix:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:7860/api/health; then
+              echo "health check passed"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "health check failed"
+          docker logs sawtix-ci
+          exit 1
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f sawtix-ci || true
